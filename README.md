@@ -1,6 +1,10 @@
 # tennis
 # This project controls tennis game scores and shows feedback on how the score looks currently
 
+## Run game simulation:
+```
+clj -M:run
+```
 ## Run tests:
 
 clj -M:test
@@ -16,8 +20,8 @@ clj
 
 Available functions:
 ```
-(tennis-game :player1) ;; add game to player1 
-(tennis-game :player2) ;; add game to player2
-(tennis-game :random)  ;; add game to random player
-(tennis-game :reset)   ;; reset game
+(tennis-set-score :player1) ;; add game to player1 
+(tennis-set-score :player2) ;; add game to player2
+(tennis-set-score :random)  ;; add game to random player
+(tennis-set-score :reset)   ;; reset game
 ```
