@@ -44,8 +44,8 @@ clj
 
 Available functions:
 ```
-(tennis-set-score :player1) ;; add game to player1 
-(tennis-set-score :player2) ;; add game to player2
+(tennis-set-score :player-1-scored) ;; add game to player1 
+(tennis-set-score :player-2-scored) ;; add game to player2
 (tennis-set-score :random-player)  ;; add game to random player
 (tennis-set-score :reset)   ;; reset game
 ```
