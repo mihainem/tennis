@@ -3,8 +3,6 @@
 (def config {:max-matches 3
              :labels [0 15 30 40 "A"]})
 
-(defn label [i]
-  (nth (:labels config) i))
 
 (def default-scores {:player1 {:point 0
                                :sets [0]
@@ -13,19 +11,37 @@
                                :sets [0]
                                :match 0}})
 
-(def scores (atom default-scores))
+(def scores-atom (atom default-scores))
+
+
+(defn label
+  "get proper label for the number of points a player has"
+  [i]
+  (nth (:labels config) i))
 
 
 (defn- adversary-advantage?
   "when adversary has advantage, then it defaults to 40-40(deuce) for both players"
   [point point-adv]
-  (= (- point point-adv) -1))
+  (and (>= point 3)
+       (= (- point point-adv) -1)))
 
 (defn- inc-point-only?
   "when winning a point increases only the point score"
   [point point-adv]
   (or (< point 3)
       (= point point-adv)))
+
+(defn- inc-set-only?
+  "when winning a point increases only set score"
+  [point point-adv set set-adv]
+  (and
+   (or  (< (- point point-adv) 1)
+        (< set 5)
+        (< (- set set-adv) 1))
+   (>= point 3)
+   (or (< set 6)
+       (<= (abs (- set set-adv)) 1))))
 
 
 (defn- inc-set-match?
@@ -36,29 +52,20 @@
        (>= (- set set-adv) 1)))
 
 
-(defn- inc-set-only?
-  "when winning a point increases only set score"
-  [point point-adv set set-adv]
-  (and
-   (not (inc-set-match? point point-adv set set-adv))
-   (>= point 3)
-   (>= (- point point-adv) 1)
-   (or (< set 6)
-       (= (- set set-adv) -1)
-       (= (- set set-adv) 0))))
-
-
-(defn- inc-set [sets set end-match?]
-  (if end-match?
-    (conj (pop sets) (inc set))
-    (conj (pop sets) (inc set) 0)))
+(defn- inc-set
+  "when increasing the set does not end the game 
+   add a new set starting from 0"
+  [sets set end-game?]
+  (if (not end-game?)
+    (conj (pop sets) (inc set) 0)
+    (conj (pop sets) (inc set))))
 
 
 (defn increase-score
-  "Increase one of the player's score
+  "increase one of the player's score
    with one argument - convenient to serve the game,
    with two arguments - useful to test specific state change."
-  ([player] (increase-score player @scores))
+  ([player] (increase-score player @scores-atom))
   ([player score]
    (let [{:keys [point sets match]} (player score)
          [adversary {point-adv :point
@@ -91,15 +98,17 @@
 
        ;;when winning a point increases set and match scores
        (inc-set-match? point point-adv set set-adv)
-       (let [end-match? (= (inc match) max-matches)]
+       (let [end-game? (= (inc match) max-matches)]
          (-> score
-             (assoc-in [player :point] (if end-match? point 0))
-             (assoc-in [player :sets] (inc-set sets set end-match?))
+             (assoc-in [player :point] (if end-game? point 0))
+             (assoc-in [player :sets] (inc-set sets set end-game?))
              (assoc-in [player :match] (inc match))
-             (assoc-in [adversary :point] (if end-match? point-adv 0))
-             (assoc-in [adversary :sets] (if end-match? sets-adv (conj sets-adv 0)))))))))
+             (assoc-in [adversary :point] (if end-game? point-adv 0))
+             (assoc-in [adversary :sets] (if end-game? sets-adv (conj sets-adv 0)))))))))
 
-(defn- print-total-score [new-state]
+(defn- print-total-score
+  "print all scores: points, sets, matches"
+  [new-state]
   (let [{:keys [max-matches]} config
         {point1 :point sets1 :sets match1 :match} (:player1 new-state)
         {point2 :point sets2 :sets match2 :match} (:player2 new-state)]
@@ -118,7 +127,9 @@
         (println "Match: " match1 " | " match2)
         (println "All sets: " (map vector sets1 sets2))))))
 
-(defn- print-points-score [old-state new-state]
+(defn- print-points-score
+  "print only points scored in a set and mark the 'WON!' case"
+  [old-state new-state]
   (let [{old-point1 :point} (:player1 old-state)
         {old-point2 :point} (:player2 old-state)
         {point1 :point} (:player1 new-state)
@@ -130,22 +141,28 @@
         (println (str (label old-point1) " : WON!")))
       (println (label point1) " : " (label point2)))))
 
-(add-watch scores :watcher
+(add-watch scores-atom :watcher
            (fn [_ _ old-state new-state]
              (print-total-score new-state)
              (print-points-score old-state new-state)))
 
 
-(defn- reset-score [score]
-  (reset! scores score))
+(defn- reset-score
+  "set scores atom to specific value"
+  [score]
+  (reset! scores-atom score))
 
 
-(defn- add-point-to [player]
+(defn- add-point-to
+  "increase score for one player and save results"
+  [player]
   (->> (increase-score player)
-       (reset! scores)))
+       (reset! scores-atom)))
 
 
-(defn tennis-set-simulator [player]
+(defn tennis-set-simulator
+  "simulator interface to control it's features"
+  [player]
   (case player
     :reset (reset-score default-scores)
     :random-player (add-point-to (rand-nth [:player1 :player2]))
@@ -153,7 +170,9 @@
     :player-2-scored (add-point-to :player2)))
 
 
-(defn -main [& _]
+(defn -main
+  "starts a full game simulation and prints scores on each winning point"
+  [& _]
   (let [{:keys [max-matches]} config]
     (loop [state (tennis-set-simulator :reset)]
       (let [match1 (:match (:player1 state))

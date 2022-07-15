@@ -8,13 +8,16 @@
     {:player1 {:point game1 :sets sets1 :match match1}
      :player2 {:point game2 :sets sets2 :match match2}}))
 
-(vectors->map [2 [0] 0] [2 [0] 0])
+
+
 (deftest test-scores
   (testing "increase simple game"
+    (is (= (increase-score :player1 (vectors->map [0 [5 6] 0] [1 [7 7] 1])) (vectors->map [1 [5 6] 0] [1 [7 7] 1])))
     (is (= (increase-score :player1 (vectors->map [2 [0] 0] [2 [0] 0])) (vectors->map [3 [0] 0] [2 [0] 0])) true)
     (is (= (increase-score :player1 (vectors->map [2 [0] 0] [2 [0] 0])) (vectors->map [3 [0] 0] [2 [0] 0])) true)
     (is (= (increase-score :player1 (vectors->map [0 [1] 0] [0 [0] 0])) (vectors->map [1 [1] 0] [0 [0] 0])) true))
   (testing "increase game and set"
+    (is (= (increase-score :player2 (vectors->map [3 [2] 0] [4 [3] 0])) (vectors->map [0 [2] 0] [0 [4] 0])))
     (is (= (increase-score :player1 (vectors->map [3 [0] 0] [2 [0] 0])) (vectors->map [0 [1] 0] [0 [0] 0])) true)
     (is (= (increase-score :player1 (vectors->map [3 [0] 0] [0 [0] 0])) (vectors->map [0 [1] 0] [0 [0] 0])) true)
     (is (= (increase-score :player1 (vectors->map [4 [0] 0] [3 [0] 0])) (vectors->map [0 [1] 0] [0 [0] 0])) true))
