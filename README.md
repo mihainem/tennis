@@ -1,51 +1,60 @@
-# tennis
-# Write the code (implementation + tests) in clojure giving ability to report score of single set of a tennis match in REPL. Code should handle state between subsequent calls of functions in REPL. After REPL is stopped state don't have to be stored anymore.
+# Tennis Game Simulator
 
-# Example interaction with REPL:
-```(tennis-set-simulator)
-0 : 0
-(tennis-set-simulator :player-1-scored)
-15 : 0
-(tennis-set-simulator :player-1-scored)
-30 : 0
-(tennis-set-simulator :player-2-scored)
-30 : 15
-(tennis-set-simulator :player-1-scored)
-40 : 15
-(tennis-set-simulator :player-1-scored)
-WON! : 15
-(tennis-set-simulator)
-WON! : 15
-(tennis-set-simulator :reset)
-0 : 0
-(tennis-set-simulator)
-0 : 0
+This Clojure project provides a tennis game simulation allowing you to report scores for a tennis match within a REPL environment. The code handles state between subsequent calls in the REPL, but the state is not stored once the REPL is stopped.
+
+## Example Interaction with REPL:
+
+```clojure
+(tennis-set-score)
+;; Output: 0 : 0
+
+(tennis-set-score :player-1-scored)
+;; Output: 15 : 0
+
+(tennis-set-score :player-1-scored)
+;; Output: 30 : 0
+
+(tennis-set-score :player-2-scored)
+;; Output: 30 : 15
+
+(tennis-set-score :player-1-scored)
+;; Output: 40 : 15
+
+(tennis-set-score :player-1-scored)
+;; Output: WON! : 15
+
+(tennis-set-score)
+;; Output: WON! : 15
+
+(tennis-set-score :reset)
+;; Output: 0 : 0
+
+(tennis-set-score)
+;; Output: 0 : 0
 ```
-# extended the task and so I implemented not only point and set but also: match, game.
 
+## Extended Functionality:
 
-# This project contains a simulation which controls tennis game scores and shows feedback on how the score looks currently
-## Run game simulation:
-```
+The initial task has been extended, and the implementation now includes not only points and sets but also match and game tracking.
+
+## How to Run the Game Simulation:
+
+```bash
 clj -M:run
 ```
-## Run tests:
 
+How to Run Tests:
+```bash
 clj -M:test
-
-
-## Run the repl:
 ```
+How to Run the REPL:
+```bash
 clj
 (load-file "src/tennis/core.clj")
 (use 'tennis.core)
 ```
-
-
-Available functions:
-```
-(tennis-set-score :player-1-scored) ;; add game to player1 
-(tennis-set-score :player-2-scored) ;; add game to player2
-(tennis-set-score :random-player)  ;; add game to random player
-(tennis-set-score :reset)   ;; reset game
-```
+Available Functions in REPL:
+(tennis-set-score :player-1-scored): Add a game to player 1.
+(tennis-set-score :player-2-scored): Add a game to player 2.
+(tennis-set-score :random-player): Add a game to a random player.
+(tennis-set-score :reset): Reset the game.
